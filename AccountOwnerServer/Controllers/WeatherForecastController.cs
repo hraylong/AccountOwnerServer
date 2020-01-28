@@ -6,7 +6,7 @@ using AccountOwner.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace AccountOwnerServer.Controllers
+namespace AccountOwner.Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]

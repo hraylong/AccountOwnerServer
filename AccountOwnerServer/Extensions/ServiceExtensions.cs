@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using AccountOwner.DataAccessLayer;
 using AccountOwner.Repository;
 
-namespace AccountOwnerServer.Extensions
+namespace AccountOwner.Server.Extensions
 {
     public static class ServiceExtensions
     {
