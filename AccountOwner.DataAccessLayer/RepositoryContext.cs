@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AccountOwner.DataAccessLayer.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace AccountOwner.DataAccessLayer
 {
@@ -11,5 +12,10 @@ namespace AccountOwner.DataAccessLayer
 
         public DbSet<Owner> Owners { get; set; }
         public DbSet<Account> Accounts { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new OwnerConfiguration());
+        }
     }
 }

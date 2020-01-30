@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AccountOwner.DataAccessLayer;
 using AccountOwner.Server.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -31,6 +33,9 @@ namespace AccountOwner.Server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<RepositoryContext>(opts =>
+                    opts.UseMySql(Configuration.GetConnectionString("mysqlconnection"),
+                        options => options.MigrationsAssembly("AccountOwner.Server")));
             services.ConfigureCors();
             services.ConfigureIISIntegration();
             services.ConfigureLoggerService();

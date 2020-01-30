@@ -17,6 +17,10 @@ namespace AccountOwner.Server
             CreateMap<Account, AccountDto>();
 
             CreateMap<Owner, OwnerDto>();
+
+            CreateMap<OwnerForCreationDto, Owner>();
+
+            CreateMap<OwnerForUpdateDto, Owner>();
         }
     }
 }

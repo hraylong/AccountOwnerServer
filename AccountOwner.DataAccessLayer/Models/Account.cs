@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AccountOwner.DataAccessLayer
 {
-    [Table("Account")]
+    //[Table("Account")]
     public class Account
     {
-        [Column("AccountId")]
+        //[Column("AccountId")]
         public Guid Id { get; set; }
 
         [Required(ErrorMessage = "Date created is required")]
