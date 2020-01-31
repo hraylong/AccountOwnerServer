@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using AccountOwner.Contracts;
@@ -8,6 +9,7 @@ using AccountOwner.DataAccessLayer.DataTransferObjects;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AccountOwner.Server.Controllers
 {
@@ -27,16 +29,32 @@ namespace AccountOwner.Server.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllOwners()
+        public IActionResult GetOwners([FromQuery] OwnerParameters ownerParameters)
         {
             try
             {
-                var owners = _repository.Owner.GetAllOwners();
+                if (!ownerParameters.ValidYearRange)
+                {
+                    return BadRequest("Max year of birth cannot be less than min year of birth");
+                }
 
-                _logger.LogInfo($"Returned all owners from database.");
+                var owners = _repository.Owner.GetOwners(ownerParameters);
 
-                var ownersResult = _mapper.Map<IEnumerable<OwnerDto>>(owners);
-                return Ok(ownersResult);
+                var metadata = new
+                {
+                    owners.TotalCount,
+                    owners.PageSize,
+                    owners.CurrentPage,
+                    owners.TotalPages,
+                    owners.HasNext,
+                    owners.HasPrevious
+                };
+
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+                _logger.LogInfo($"Returned {owners.TotalCount} owners from database.");
+
+                return Ok(owners);
             }
             catch (Exception ex)
             {
@@ -46,13 +64,13 @@ namespace AccountOwner.Server.Controllers
         }
 
         [HttpGet("{id}", Name = "OwnerById")]
-        public IActionResult GetOwnerById(Guid id)
+        public IActionResult GetOwnerById(Guid id, [FromQuery] string fields)
         {
             try
             {
-                var owner = _repository.Owner.GetOwnerById(id);
+                var owner = _repository.Owner.GetOwnerById(id, fields);
 
-                if (owner == null)
+                if (owner == default(ExpandoObject))
                 {
                     _logger.LogError($"Owner with id: {id}, hasn't been found in db.");
                     return NotFound();

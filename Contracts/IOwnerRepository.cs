@@ -1,12 +1,13 @@
 ﻿using AccountOwner.DataAccessLayer;
 using System;
-using System.Collections.Generic;
+using System.Dynamic;
 
 namespace AccountOwner.Contracts
 {
     public interface IOwnerRepository : IRepositoryBase<Owner>
     {
-        IEnumerable<Owner> GetAllOwners();
+        PagedList<ExpandoObject> GetOwners(OwnerParameters ownerParameters);
+        ExpandoObject GetOwnerById(Guid ownerId, string fields);
         Owner GetOwnerById(Guid ownerId);
         Owner GetOwnerWithDetails(Guid ownerId);
         void CreateOwner(Owner owner);

@@ -3,15 +3,31 @@ using AccountOwner.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
-using System.Text;
+using System.Linq.Dynamic.Core;
 
 namespace AccountOwner.Repository
 {
     public class OwnerRepository : RepositoryBase<Owner>, IOwnerRepository
     {
-        public OwnerRepository(RepositoryContext repositoryContext) : base(repositoryContext)
+        private ISortHelper<Owner> _sortHelper;
+        private IDataShaper<Owner> _dataShaper;
+
+        private void SearchByName(ref IQueryable<Owner> owners, string ownerName)
         {
+            if (!owners.Any() || string.IsNullOrWhiteSpace(ownerName))
+                return;
+
+            owners = owners.Where(o => o.Name.ToLower().Contains(ownerName.Trim().ToLower()));
+        }
+
+        public OwnerRepository(RepositoryContext repositoryContext, 
+            ISortHelper<Owner> sortHelper,
+            IDataShaper<Owner> dataShaper) : base(repositoryContext)
+        {
+            _sortHelper = sortHelper;
+            _dataShaper = dataShaper;
         }
 
         public IEnumerable<Owner> GetAllOwners()
@@ -19,6 +35,29 @@ namespace AccountOwner.Repository
             return FindAll()
                 .OrderBy(ow => ow.Name)
                 .ToList();
+        }
+
+        public PagedList<ExpandoObject> GetOwners(OwnerParameters ownerParameters)
+        {
+            var owners = FindByCondition(o => o.DateOfBirth.Year >= ownerParameters.MinYearOfBirth &&
+                                o.DateOfBirth.Year <= ownerParameters.MaxYearOfBirth);
+
+            SearchByName(ref owners, ownerParameters.Name);
+
+            _sortHelper.ApplySort(owners, ownerParameters.OrderBy);
+            var shapedOwners = _dataShaper.ShapeData(owners, ownerParameters.Fields);
+
+            return PagedList<ExpandoObject>.ToPagedList(shapedOwners,
+                ownerParameters.PageNumber,
+                ownerParameters.PageSize);
+        }
+
+        public ExpandoObject GetOwnerById(Guid ownerId, string fields)
+        {
+            var owner = FindByCondition(o => o.Id == ownerId)
+                .SingleOrDefault();
+
+            return _dataShaper.ShapeData(owner, fields);
         }
 
         public Owner GetOwnerById(Guid ownerId)

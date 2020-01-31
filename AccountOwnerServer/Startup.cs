@@ -1,22 +1,17 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using AccountOwner.DataAccessLayer;
 using AccountOwner.Server.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using NLog;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace AccountOwner.Server
 {
@@ -36,14 +31,21 @@ namespace AccountOwner.Server
             services.AddDbContext<RepositoryContext>(opts =>
                     opts.UseMySql(Configuration.GetConnectionString("mysqlconnection"),
                         options => options.MigrationsAssembly("AccountOwner.Server")));
+
             services.ConfigureCors();
             services.ConfigureIISIntegration();
             services.ConfigureLoggerService();
             services.ConfigureMySqlContext(Configuration);
             services.ConfigureRepositoryWrapper();
             services.AddAutoMapper(typeof(Startup));
-
-            services.AddControllers();
+            
+            services.AddControllers(config =>
+            {
+                config.RespectBrowserAcceptHeader = true;
+                config.ReturnHttpNotAcceptable = true;
+                config.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+            })
+            .AddNewtonsoftJson();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

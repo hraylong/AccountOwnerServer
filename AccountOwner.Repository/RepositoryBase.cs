@@ -18,12 +18,14 @@ namespace AccountOwner.Repository
 
         public IQueryable<T> FindAll()
         {
-            return this.RepositoryContext.Set<T>().AsNoTracking();
+            var queryReturn = this.RepositoryContext.Set<T>().AsNoTracking();
+            return queryReturn;
         }
 
         public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression)
         {
-            return this.RepositoryContext.Set<T>().Where(expression).AsNoTracking();
+            var queryReturn = this.RepositoryContext.Set<T>().Where(expression).AsNoTracking();
+            return queryReturn;
         }
 
         public void Create(T entity)

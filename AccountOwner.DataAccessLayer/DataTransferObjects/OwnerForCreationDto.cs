@@ -15,7 +15,7 @@ namespace AccountOwner.DataAccessLayer.DataTransferObjects
         public DateTime DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "Address is required")]
-        [StringLength(100, ErrorMessage = "Address cannot be loner then 100 characters")]
+        [StringLength(100, ErrorMessage = "Address cannot be longer then 100 characters")]
         public string Address { get; set; }
     }
 }
